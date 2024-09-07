@@ -1,0 +1,11 @@
+version: '3'
+services:
+  app:
+    image: auto_playwright
+    container_name: auto_playwright
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    command: ./start.sh
