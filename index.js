@@ -28,14 +28,8 @@ try {
   const body     = dom.window.document.body
 
   var article = ""
-
-  if (isProbablyReaderable(document)) {
-
-    let reader = new Readability(document).parse();
-    article = reader.content
-    console.log("read")
-  }else{
-
+    
+    // 基础过滤
     // 定义要过滤的标签
     const filters = ['javascript', 'script', 'style', 'link'];
 
@@ -49,9 +43,20 @@ try {
 
     // 获取处理后的 body 内容
     article = body.innerHTML;
-    console.log("parse")
+
+
+
+  const dom2      = new JSDOM(article);
+  const document2 = dom2.window.document
+
+
+  //再次识别一次正文
+  if (isProbablyReaderable(document2)) {
+    let reader = new Readability(document2).parse();
+    article = reader.content
+    console.log("自动识别正文区域")
   }
-  
+
   //HTML -> MarkDown
 
   var gfm = turndownPluginGfm.gfm
@@ -61,6 +66,7 @@ try {
   var markdown = turndownService.turndown(article)
 
   res.send(markdown);
+
 } catch (error) {
   browser.close()
   console.error('Error:', error); // 打印错误
