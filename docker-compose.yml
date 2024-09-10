@@ -1,10 +1,11 @@
 version: '3'
 services:
   app:
-    image: auto_playwright
-    container_name: auto_playwright
+    image: auto_crawl
+    container_name: auto_crawl
     working_dir: /app
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - .:/app
     ports:
       - "3000:3000"
