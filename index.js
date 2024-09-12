@@ -109,7 +109,7 @@ function filterHtmlContent(dom) {
 
 
 
-  const filters = ['script', 'style', 'link', 'footer', 'header'];
+  const filters = ['script', 'style', 'link', 'footer'];
 
   const elements = Array.from(body.querySelectorAll(filters.join(', ')));
 
