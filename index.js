@@ -68,7 +68,7 @@ async function returnPage(page) {
 async function openNewTab(url) {
   const page = await borrowPage(); // 从池中借用页面
   try {
-    
+
     const startTime = Date.now(); // 记录开始时间
     await page.goto(url, { waitUntil: 'load', timeout: 30000 }); // 访问指定的 URL
     //await page.waitForNetworkIdle();
@@ -86,12 +86,12 @@ async function openNewTab(url) {
   }
 }
 
-function filterHtmlContent(html) {
+function filterHtmlContent(dom) {
 
-    // 使用 jsdom 解析 HTML
-    var dom = new JSDOM(html);
-    var window = dom.window
-    var body = dom.window.document.body
+
+  var window = dom.window
+  var document = dom.window.document
+  var body = dom.window.document.body
 
   // 获取所有 display: none 的元素
   const hiddenElements = body.querySelectorAll('*');
@@ -142,7 +142,21 @@ function filterHtmlContent(html) {
     }
   });
 
-  return body.innerHTML
+  return dom
+}
+
+function _readability(dom) {
+  var document = dom.window.document
+  //再次识别一次正文
+  if (isProbablyReaderable(document)) {
+    let reader = new Readability(document).parse();
+    console.log("自动识别正文区域")
+    article = reader.content
+    return article
+  } else {
+    return dom.window.document.body.innerHTML
+  }
+
 }
 
 
@@ -155,33 +169,12 @@ app.post('/', async (req, res) => {
 
 
     var html = await openNewTab(url)
-    html = filterHtmlContent(html)
+    // 使用 jsdom 解析 HTML
+    var dom = new JSDOM(html);
 
+    dom = filterHtmlContent(dom)
 
-    var article = ""
-
-
-
-
-
-
-    // 获取处理后的 body 内容
-    article = body.innerHTML;
-
-
-
-    const dom2 = new JSDOM(article);
-    const document2 = dom2.window.document
-
-
-    //再次识别一次正文
-    //if (isProbablyReaderable(document2)) {
-    //  let reader = new Readability(document2).parse();
-    // article = reader.content
-    // console.log("自动识别正文区域")
-    //}
-
-    //HTML -> MarkDown
+    var article = _readability(dom)
 
     var gfm = turndownPluginGfm.gfm
     var turndownService = new TurndownService()
