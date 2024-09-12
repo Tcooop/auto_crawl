@@ -109,40 +109,36 @@ function filterHtmlContent(dom) {
 
 
 
-  // 定义要过滤的标签
-  const filters = ['script', 'style', 'link', 'javascript', 'footer'];
+  const filters = ['script', 'style', 'link', 'footer', 'header'];
 
-  // 过滤掉非有意义的标签
   const elements = Array.from(body.querySelectorAll(filters.join(', ')));
 
   elements.forEach(element => {
-    let parent = element.parentElement;
-    let isInMeaningfulBlock = false;
+      let parent = element.parentElement;
+      let isInMeaningfulBlock = false;
 
-    // 检查所有父级标签，直到找到相关容器
-    while (parent) {
-      const tagName = parent.tagName.toLowerCase();
+      while (parent) {
+          const tagName = parent.tagName.toLowerCase();
 
-      if (
-        tagName === 'pre' ||
-        tagName === 'code' ||
-        tagName === 'iframe' ||
-        tagName === 'template' ||
-        tagName === 'object' ||
-        tagName === 'svg' ||
-        tagName === 'form' ||
-        tagName === 'canvas'
-      ) {
-        isInMeaningfulBlock = true;
-        break;
+          if (
+              tagName === 'pre' ||
+              tagName === 'code' ||
+              tagName === 'iframe' ||
+              tagName === 'template' ||
+              tagName === 'object' ||
+              tagName === 'svg' ||
+              tagName === 'form' ||
+              tagName === 'canvas'
+          ) {
+              isInMeaningfulBlock = true;
+              break;
+          }
+          parent = parent.parentElement;
       }
-      parent = parent.parentElement;
-    }
 
-    // 如果不在有意义的块中，则移除该标签
-    if (!isInMeaningfulBlock) {
-      element.remove();
-    }
+      if (!isInMeaningfulBlock) {
+          element.remove();
+      }
   });
 
 
