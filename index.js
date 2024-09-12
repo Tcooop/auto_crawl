@@ -73,7 +73,7 @@ async function openNewTab(url) {
   }
   try {
     const startTime = Date.now(); // 记录开始时间
-    await page.goto(url, { waitUntil: 'load', timeout: 30000 }); // 访问指定的 URL
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 }); // 访问指定的 URL
     //await page.waitForNetworkIdle();
     // page.on('console', msg => console.log('PAGE LOG:', msg.text()), url);
     var html = await page.evaluate(() => document.documentElement.outerHTML);
