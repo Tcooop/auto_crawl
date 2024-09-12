@@ -68,7 +68,7 @@ async function returnPage(page) {
 
 async function openNewTab(url) {
   const page = await borrowPage(); // 从池中借用页面
-  if(page===nul){
+  if(page===null){
     return null
   }
   try {
