@@ -193,6 +193,10 @@ app.post('/', async (req, res) => {
 
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+getBrowser().then(() => {
+  app.listen(port, () => {
+    console.log(`App listening at http://localhost:${port}`);
+  });
+}).catch(err => {
+  console.error('Error starting browser:', err);
 });
