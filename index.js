@@ -55,6 +55,7 @@ async function getBrowser() {
 // 从页面池中借用一个页面
 async function borrowPage() {
   if (pagePool.length === 0) {
+    console.log(`No available pages in pool`);
     throw new Error('No available pages in pool');
   }
   return pagePool.pop();
@@ -66,13 +67,12 @@ async function returnPage(page) {
 }
 
 async function openNewTab(url) {
-  const page = await borrowPage(); // 从池中借用页面
   try {
-
+    const page = await borrowPage(); // 从池中借用页面
     const startTime = Date.now(); // 记录开始时间
     await page.goto(url, { waitUntil: 'load', timeout: 30000 }); // 访问指定的 URL
     //await page.waitForNetworkIdle();
-    page.on('console', msg => console.log('PAGE LOG:', msg.text()), url);
+    // page.on('console', msg => console.log('PAGE LOG:', msg.text()), url);
     var html = await page.evaluate(() => document.documentElement.outerHTML);
     const endTime = Date.now(); // 记录结束时间
     const duration = endTime - startTime; // 计算耗时
