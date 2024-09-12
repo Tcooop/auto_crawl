@@ -110,7 +110,7 @@ function filterHtmlContent(dom) {
 
 
   // 定义要过滤的标签
-  const filters = ['script', 'style', 'link', 'javascript'];
+  const filters = ['script', 'style', 'link', 'javascript', 'footer'];
 
   // 过滤掉非有意义的标签
   const elements = Array.from(body.querySelectorAll(filters.join(', ')));
