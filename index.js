@@ -96,7 +96,7 @@ function filterHtmlContent(dom) {
   var document = dom.window.document
   var body = dom.window.document.body
 
-  // 获取所有 display: none 的元素
+  // // 获取所有 display: none 的元素
   // const hiddenElements = body.querySelectorAll('*');
 
   // hiddenElements.forEach(element => {
@@ -145,6 +145,14 @@ function filterHtmlContent(dom) {
     }
   });
 
+
+    // 正则表达式匹配 Base64 图片
+    const base64ImageRegex = /<img [^>]*src=["']data:image\/[^"']*["'][^>]*>/gi;
+    
+    // 移除所有 Base64 图像
+    body.innerHTML = body.innerHTML.replace(base64ImageRegex, '');
+
+
   return dom
 }
 
@@ -175,7 +183,7 @@ app.post('/', async (req, res) => {
     // 使用 jsdom 解析 HTML
     var dom = new JSDOM(html);
 
-    // dom = filterHtmlContent(dom)
+    dom = filterHtmlContent(dom)
 
     var article = _readability(dom)
 
