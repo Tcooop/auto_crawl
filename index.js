@@ -12,7 +12,7 @@ const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 
 let browser; // 全局变量，用于存储浏览器实例
 const pagePool = []; // 页面池
-const poolSize = 5;  // 预先打开的页面数量
+const poolSize = 10;  // 预先打开的页面数量
 
 async function getBrowser() {
   if (!browser) {
