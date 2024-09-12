@@ -86,6 +86,65 @@ async function openNewTab(url) {
   }
 }
 
+function filterHtmlContent(html) {
+
+    // 使用 jsdom 解析 HTML
+    var dom = new JSDOM(html);
+    var window = dom.window
+    var body = dom.window.document.body
+
+  // 获取所有 display: none 的元素
+  const hiddenElements = body.querySelectorAll('*');
+
+  hiddenElements.forEach(element => {
+    // 判断元素的计算样式是否为 display: none
+    const computedStyle = window.getComputedStyle(element);
+    if (computedStyle.display === 'none') {
+      element.remove();
+    }
+  });
+
+
+
+  // 定义要过滤的标签
+  const filters = ['script', 'style', 'link', 'javascript'];
+
+  // 过滤掉非有意义的标签
+  const elements = Array.from(body.querySelectorAll(filters.join(', ')));
+
+  elements.forEach(element => {
+    let parent = element.parentElement;
+    let isInMeaningfulBlock = false;
+
+    // 检查所有父级标签，直到找到相关容器
+    while (parent) {
+      const tagName = parent.tagName.toLowerCase();
+
+      if (
+        tagName === 'pre' ||
+        tagName === 'code' ||
+        tagName === 'iframe' ||
+        tagName === 'template' ||
+        tagName === 'object' ||
+        tagName === 'svg' ||
+        tagName === 'form' ||
+        tagName === 'canvas'
+      ) {
+        isInMeaningfulBlock = true;
+        break;
+      }
+      parent = parent.parentElement;
+    }
+
+    // 如果不在有意义的块中，则移除该标签
+    if (!isInMeaningfulBlock) {
+      element.remove();
+    }
+  });
+
+  return body.innerHTML
+}
+
 
 app.post('/', async (req, res) => {
 
@@ -93,69 +152,15 @@ app.post('/', async (req, res) => {
   const url = args.url
 
   try {
+
+
     var html = await openNewTab(url)
-    // 使用 jsdom 解析 HTML
-    var dom = new JSDOM(html);
-    var window = dom.window
-    var document = dom.window.document
-    var body = dom.window.document.body
-
-
-
-
+    html = filterHtmlContent(html)
 
 
     var article = ""
 
 
-    // 获取所有 display: none 的元素
-    const hiddenElements = body.querySelectorAll('*');
-
-    hiddenElements.forEach(element => {
-      // 判断元素的计算样式是否为 display: none
-      const computedStyle = window.getComputedStyle(element);
-      if (computedStyle.display === 'none') {
-        element.remove();
-      }
-    });
-
-
-
-    // 定义要过滤的标签
-    const filters = ['script', 'style', 'link', 'javascript'];
-
-    // 过滤掉非有意义的标签
-    const elements = Array.from(body.querySelectorAll(filters.join(', ')));
-
-    elements.forEach(element => {
-      let parent = element.parentElement;
-      let isInMeaningfulBlock = false;
-
-      // 检查所有父级标签，直到找到相关容器
-      while (parent) {
-        const tagName = parent.tagName.toLowerCase();
-
-        if (
-          tagName === 'pre' ||
-          tagName === 'code' ||
-          tagName === 'iframe' ||
-          tagName === 'template' ||
-          tagName === 'object' ||
-          tagName === 'svg' ||
-          tagName === 'form' ||
-          tagName === 'canvas'
-        ) {
-          isInMeaningfulBlock = true;
-          break;
-        }
-        parent = parent.parentElement;
-      }
-
-      // 如果不在有意义的块中，则移除该标签
-      if (!isInMeaningfulBlock) {
-        element.remove();
-      }
-    });
 
 
 
