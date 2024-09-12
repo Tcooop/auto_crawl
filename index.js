@@ -97,15 +97,15 @@ function filterHtmlContent(dom) {
   var body = dom.window.document.body
 
   // 获取所有 display: none 的元素
-  const hiddenElements = body.querySelectorAll('*');
+  // const hiddenElements = body.querySelectorAll('*');
 
-  hiddenElements.forEach(element => {
-    // 判断元素的计算样式是否为 display: none
-    const computedStyle = window.getComputedStyle(element);
-    if (computedStyle.display === 'none') {
-      element.remove();
-    }
-  });
+  // hiddenElements.forEach(element => {
+  //   // 判断元素的计算样式是否为 display: none
+  //   const computedStyle = window.getComputedStyle(element);
+  //   if (computedStyle.display === 'none') {
+  //     element.remove();
+  //   }
+  // });
 
 
 
@@ -175,7 +175,7 @@ app.post('/', async (req, res) => {
     // 使用 jsdom 解析 HTML
     var dom = new JSDOM(html);
 
-    dom = filterHtmlContent(dom)
+    // dom = filterHtmlContent(dom)
 
     var article = _readability(dom)
 
