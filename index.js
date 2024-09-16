@@ -94,7 +94,8 @@ async function openNewTab(url) {
 }
 
 function filterHtmlContent(dom) {
-  const { document, body } = dom.window;
+  const { document } = dom.window;
+  const { body } = document;
   const filters = ['script', 'style', 'link', 'footer'];
   const meaningfulTags = ['pre', 'code', 'iframe', 'template', 'object', 'svg', 'form', 'canvas'];
 
