@@ -9,7 +9,6 @@ const TurndownService = require('@joplin/turndown')
 const turndownPluginGfm = require('@joplin/turndown-plugin-gfm')
 const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 
-
 let browser; // 全局变量，用于存储浏览器实例
 const pagePool = []; // 页面池
 const poolSize = 10;  // 预先打开的页面数量
@@ -34,22 +33,30 @@ async function getBrowser() {
       ]
     });
 
-    // 预先创建页面并放入池中
-    for (let i = 0; i < poolSize; i++) {
-      const page = await browser.newPage();
-      await page.setRequestInterception(true);
-      page.on('request', (request) => {
-        if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
-          request.abort();
-        } else {
-          request.continue();
-        }
-      });
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-      pagePool.push(page);
-    }
+    await initializePagePool();
   }
   return browser;
+}
+
+async function initializePagePool() {
+  for (let i = 0; i < poolSize; i++) {
+    const page = await createConfiguredPage();
+    pagePool.push(page);
+  }
+}
+
+async function createConfiguredPage() {
+  const page = await browser.newPage();
+  await page.setRequestInterception(true);
+  page.on('request', (request) => {
+    if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+  return page;
 }
 
 // 从页面池中借用一个页面
@@ -68,15 +75,12 @@ async function returnPage(page) {
 
 async function openNewTab(url) {
   const page = await borrowPage(); // 从池中借用页面
-  if(page===null){
-    return null
-  }
+  if (!page) return null;
+
   try {
     const startTime = Date.now(); // 记录开始时间
     await page.goto(url, { waitUntil: 'load', timeout: 30000 }); // 访问指定的 URL
-    //await page.waitForNetworkIdle();
-    // page.on('console', msg => console.log('PAGE LOG:', msg.text()), url);
-    var html = await page.evaluate(() => document.documentElement.outerHTML);
+    const html = await page.evaluate(() => document.documentElement.outerHTML);
     const endTime = Date.now(); // 记录结束时间
     const duration = endTime - startTime; // 计算耗时
     console.log(`Page loaded in ${duration} ms`); // 输出耗时
@@ -90,112 +94,47 @@ async function openNewTab(url) {
 }
 
 function filterHtmlContent(dom) {
-
-
-  var window = dom.window
-  var document = dom.window.document
-  var body = dom.window.document.body
-
-  // // 获取所有 display: none 的元素
-  // const hiddenElements = body.querySelectorAll('*');
-
-  // hiddenElements.forEach(element => {
-  //   // 判断元素的计算样式是否为 display: none
-  //   const computedStyle = window.getComputedStyle(element);
-  //   if (computedStyle.display === 'none') {
-  //     element.remove();
-  //   }
-  // });
-
-
-
+  const { document, body } = dom.window;
   const filters = ['script', 'style', 'link', 'footer'];
+  const meaningfulTags = ['pre', 'code', 'iframe', 'template', 'object', 'svg', 'form', 'canvas'];
 
-  const elements = Array.from(body.querySelectorAll(filters.join(', ')));
-
-  elements.forEach(element => {
-      let parent = element.parentElement;
-      let isInMeaningfulBlock = false;
-
-      while (parent) {
-          const tagName = parent.tagName.toLowerCase();
-
-          if (
-              tagName === 'pre' ||
-              tagName === 'code' ||
-              tagName === 'iframe' ||
-              tagName === 'template' ||
-              tagName === 'object' ||
-              tagName === 'svg' ||
-              tagName === 'form' ||
-              tagName === 'canvas'
-          ) {
-              isInMeaningfulBlock = true;
-              break;
-          }
-          parent = parent.parentElement;
+  Array.from(body.querySelectorAll(filters.join(', ')))
+    .forEach(element => {
+      if (!element.closest(meaningfulTags.join(','))) {
+        element.remove();
       }
+    });
 
-      if (!isInMeaningfulBlock) {
-          element.remove();
-      }
-  });
-
-
-    // 正则表达式匹配 Base64 图片
-    const base64ImageRegex = /<img [^>]*src=["']data:image\/[^"']*["'][^>]*>/gi;
-    
-    // 移除所有 Base64 图像
-    body.innerHTML = body.innerHTML.replace(base64ImageRegex, '');
-
-
-  return dom
+  body.innerHTML = body.innerHTML.replace(/<img [^>]*src=["']data:image\/[^"']*["'][^>]*>/gi, '');
+  return dom;
 }
 
 function _readability(dom) {
-  var document = dom.window.document
-  //再次识别一次正文
+  const { document } = dom.window;
   if (isProbablyReaderable(document)) {
-    let reader = new Readability(document).parse();
-    console.log("自动识别正文区域")
-    article = reader.content
-    return article
-  } else {
-    return dom.window.document.body.innerHTML
+    console.log("自动识别正文区域");
+    return new Readability(document).parse().content;
   }
-
+  return document.body.innerHTML;
 }
 
-
 app.post('/', async (req, res) => {
-
-  const args = req.body; // 获取请求体中的数据 
-  const url = args.url
-
+  const { url } = req.body;
   try {
+    const html = await openNewTab(url);
+    if (!html) throw new Error("Failed to fetch page content");
 
+    const dom = filterHtmlContent(new JSDOM(html));
+    const article = _readability(dom);
 
-    var html = await openNewTab(url)
-    // 使用 jsdom 解析 HTML
-    var dom = new JSDOM(html);
-
-    dom = filterHtmlContent(dom)
-
-    var article = _readability(dom)
-
-    var gfm = turndownPluginGfm.gfm
-    var turndownService = new TurndownService()
-    turndownService.use(gfm)
-
-    var markdown = turndownService.turndown(article)
+    const turndownService = new TurndownService().use(turndownPluginGfm.gfm);
+    const markdown = turndownService.turndown(article);
 
     res.send(markdown);
-
   } catch (error) {
-    console.error('Error:', error); // 打印错误
-    res.status(500).send(error.message)
+    console.error('Error:', error);
+    res.status(500).send(error.message);
   }
-
 });
 
 getBrowser().then(() => {
