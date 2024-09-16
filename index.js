@@ -94,7 +94,6 @@ async function openNewTab(url) {
 }
 
 function filterHtmlContent(dom) {
-  console.log(dom.window.body.innerHTML);
   const { document, body } = dom.window;
   const filters = ['script', 'style', 'link', 'footer'];
   const meaningfulTags = ['pre', 'code', 'iframe', 'template', 'object', 'svg', 'form', 'canvas'];
@@ -124,7 +123,7 @@ app.post('/', async (req, res) => {
   try {
     const html = await openNewTab(url);
     if (!html) throw new Error("Failed to fetch page content");
-
+    console.log(html);
     const dom = filterHtmlContent(new JSDOM(html));
     const article = _readability(dom);
 
