@@ -123,9 +123,16 @@ app.post('/', async (req, res) => {
   try {
     const html = await openNewTab(url);
     if (!html) throw new Error("Failed to fetch page content");
-    console.log(html);
-    const dom = filterHtmlContent(new JSDOM(html));
-    const article = _readability(dom);
+    console.log("HTML content length:", html.length);
+
+    const dom = new JSDOM(html);
+    console.log("JSDOM created successfully");
+    console.log("JSDOM window:", !!dom.window);
+    console.log("JSDOM document:", !!dom.window.document);
+    console.log("JSDOM body:", !!dom.window.document.body);
+
+    const filteredDom = filterHtmlContent(dom);
+    const article = _readability(filteredDom);
 
     const turndownService = new TurndownService().use(turndownPluginGfm.gfm);
     const markdown = turndownService.turndown(article);
