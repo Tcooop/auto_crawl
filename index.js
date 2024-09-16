@@ -153,4 +153,5 @@ getBrowser().then(() => {
   });
 }).catch(err => {
   console.error('Error starting browser:', err);
+  process.exit(1);
 });
