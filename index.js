@@ -1,17 +1,19 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const { JSDOM } = require('jsdom'); // 引入 jsdom
-const app = express();
 const bodyParser = require('body-parser'); // 用于解析请求体
-app.use(bodyParser.json());
-const port = 3000;
-const TurndownService = require('@joplin/turndown')
-const turndownPluginGfm = require('@joplin/turndown-plugin-gfm')
+const TurndownService = require('@joplin/turndown');
+const turndownPluginGfm = require('@joplin/turndown-plugin-gfm');
 const { Readability, isProbablyReaderable } = require('@mozilla/readability');
+
+const app = express();
+const port = 3000;
+const poolSize = 10;  // 预先打开的页面数量
+
+app.use(bodyParser.json());
 
 let browser; // 全局变量，用于存储浏览器实例
 const pagePool = []; // 页面池
-const poolSize = 10;  // 预先打开的页面数量
 
 async function getBrowser() {
   if (!browser) {
