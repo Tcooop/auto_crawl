@@ -12,6 +12,15 @@ const poolSize = 10;  // 预先打开的页面数量
 
 app.use(bodyParser.json());
 
+// 中间件：打印请求的详细信息
+app.use((req, res, next) => {
+  console.log('Request URL:', req.url);
+  console.log('Request Method:', req.method);
+  console.log('Request Headers:', req.headers);
+  console.log('Request Body:', req.body);
+  next(); // 调用 next() 以继续处理请求
+});
+
 let browser; // 全局变量，用于存储浏览器实例
 const pagePool = []; // 页面池
 
