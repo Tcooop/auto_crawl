@@ -172,6 +172,7 @@ app.get('/getsub', async (req, res) => {
       data['route']['rules'] = data['route']['rules'].filter(rule => !rule.hasOwnProperty('rule_set'));
     }
 
+    delete data['route']['rule_set'];
     res.json(data);
   } catch (error) {
     console.error('Error fetching data:', error);
