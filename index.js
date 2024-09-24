@@ -171,7 +171,7 @@ app.get('/getsub', async (req, res) => {
     // 假设内容是 JSON 结构
     if (data && data['route']['rule_set'] && Array.isArray(data['route']['rule_set'])) {
       // 修改 rule_set 子元素中的 url 参数
-      data['rule_set'].forEach(rs => {
+      data['route']['rule_set'].forEach(rs => {
         if (rs.tag == 'geoip-cn') {
           rs.url = 'https://data.devtool.uk/geoip-cn.db';
         }
