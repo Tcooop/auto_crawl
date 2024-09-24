@@ -156,6 +156,39 @@ app.post('/', async (req, res) => {
   }
 });
 
+app.get('/getsub', async (req, res) => {
+  try {
+    // 从指定的 URL 获取内容
+    const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=d42fdfbf3cbd13f526e68f1a75681f8e', {
+      headers: {
+        'User-Agent': 'SFA/1.9.6 (394; sing-box 1.9.6)'
+      }
+    });
+    const data = response.data;
+
+    // 假设内容是 JSON 结构
+    if (data && data['route']['rule_set'] && Array.isArray(data['route']['rule_set'])) {
+      // 修改 rule_set 子元素中的 url 参数
+      data['rule_set'].forEach(rs => {
+        if (rs.tag == 'geoip-cn') {
+          rs.url = 'https://data.devtool.uk/geoip-cn.db';
+        }
+        if (rs.tag == 'geosite-cn') {
+          rs.url = 'https://data.devtool.uk/geosite-cn.db';
+        }
+      });
+
+      // 返回修改后的 JSON 数据
+      res.json(data);
+    } else {
+      res.status(400).send('Invalid data structure');
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 getBrowser().then(() => {
   app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
