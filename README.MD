@@ -1,2 +1,2 @@
 # 构建镜像
-docker build -t auto_playwright . 
+docker build -t auto_crawl . 

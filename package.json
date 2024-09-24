@@ -11,6 +11,7 @@
     "@joplin/turndown": "^4.0.74",
     "@joplin/turndown-plugin-gfm": "^1.0.56",
     "@mozilla/readability": "^0.5.0",
+    "axios": "^1.7.7",
     "express": "^4.19.2",
     "jsdom": "^25.0.0",
     "puppeteer": "^23.3.0"
