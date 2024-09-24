@@ -174,10 +174,10 @@ app.get('/getsub', async (req, res) => {
       // 修改 rule_set 子元素中的 url 参数
       data['route']['rule_set'].forEach(rs => {
         if (rs.tag == 'geoip-cn') {
-          rs.url = 'http://data.devtool.uk/geoip-cn.db';
+          rs.url = 'https://data.devtool.uk/geoip-cn.db';
         }
         if (rs.tag == 'geosite-cn') {
-          rs.url = 'http://data.devtool.uk/geosite-cn.db';
+          rs.url = 'https://data.devtool.uk/geosite-cn.db';
         }
       });
 
