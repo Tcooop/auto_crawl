@@ -160,7 +160,6 @@ app.post('/', async (req, res) => {
 
 app.get('/getsub', async (req, res) => {
   try {
-    // 从指定的 URL 获取内容
     const response = await axios.get('https://dl.jisusub.cc/api/v1/client/subscribe?token=d42fdfbf3cbd13f526e68f1a75681f8e', {
       headers: {
         'User-Agent': 'SFA/1.9.6 (394; sing-box 1.9.6)'
@@ -168,23 +167,12 @@ app.get('/getsub', async (req, res) => {
     });
     const data = response.data;
 
-    // 假设内容是 JSON 结构
-    if (data && data['route']['rule_set'] && Array.isArray(data['route']['rule_set'])) {
-
-      // 修改 rule_set 子元素中的 url 参数
-      data['route']['rule_set'].forEach(rs => {
-        if (rs.tag == 'geoip-cn') {
-          rs.url = 'https://data.devtool.uk/geoip-cn.db';
-        }
-        if (rs.tag == 'geosite-cn') {
-          rs.url = 'https://data.devtool.uk/geosite-cn.db';
-        }
-      });
-
-      res.json(data);
-    } else {
-      res.status(400).send('Invalid data structure');
+    if (data && data['route'] && Array.isArray(data['route']['rules'])) {
+      // 使用 filter 方法创建一个新数组，排除包含 rule_set 的元素
+      data['route']['rules'] = data['route']['rules'].filter(rule => !rule.hasOwnProperty('rule_set'));
     }
+
+    res.json(data);
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).send('Internal Server Error');
